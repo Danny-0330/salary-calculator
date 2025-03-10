@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>薪資計算器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background: #f9f9f9;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+            border-radius: 5px 5px 0 0;
+        }
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 10px 15px;
+            transition: 0.3s;
+            font-size: 16px;
+        }
+        .tab button:hover {
+            background-color: #ddd;
+        }
+        .tab button.active {
+            background-color: #ccc;
+        }
+        .tabcontent {
+            display: none;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e3fcef;
+            border: 1px solid #b5e7b5;
+            border-radius: 5px;
+        }
+        label {
+            display: inline-block;
+            width: 200px;
+            margin-bottom: 5px;
+        }
+        input[type="number"], select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 150px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .salary-item {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #eee;
+            padding: 5px 0;
+        }
+        .total {
+            font-weight: bold;
+            color: #d9534f;
+        }
+        .notes {
+            margin-top: 20px;
+            padding: 10px;
+            background: #fff9e3;
+            border: 1px solid #ffe0b2;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>薪資計算器</h1>
+        
+        <div class="tab">
+            <button class="tablinks active" onclick="openTab(event, 'basicSalary')">基本設定</button>
+            <button class="tablinks" onclick="openTab(event, 'overtimeTab')">加班設定</button>
+            <button class="tablinks" onclick="openTab(event, 'bonusTab')">獎金與津貼</button>
+            <button class="tablinks" onclick="openTab(event, 'deductionTab')">扣減項目</button>
+        </div>
+        
+        <form id="salaryForm">
+            <div id="basicSalary" class="tabcontent" style="display: block;">
+                <h3>基本薪資設定</h3>
+                <div class="form-group">
+                    <label for="salaryType">薪資類型：</label>
+                    <select id="salaryType" onchange="updateSalaryFields()">
+                        <option value="monthly">月薪制</option>
+                        <option value="hourly">時薪制</option>
+                    </select>
+                </div>
+                
+                <div id="monthlySalaryFields">
+                    <div class="form-group">
+                        <label for="salary">月薪 (元)：</label>
+                        <input type="number" id="salary" value="28590" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="workingDays">每月工作天數：</label>
+                        <input type="number" id="workingDays" value="22" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="workingHours">每日工作時數：</label>
+                        <input type="number" id="workingHours" value="8" required>
+                    </div>
+                </div>
+                
+                <div id="hourlySalaryFields" class="hidden">
+                    <div class="form-group">
+                        <label for="hourlyRate">時薪 (元/小時)：</label>
+                        <input type="number" id="hourlyRate" value="168" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="totalHours">本月工作總時數：</label>
+                        <input type="number" id="totalHours" value="176" required>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="overtimeTab" class="tabcontent">
+                <h3>加班設定</h3>
+                <div class="form-group">
+                    <label for="hours1">平日加班前2小時：</label>
+                    <input type="number" id="hours1" value="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="hours2">平日加班2小時以上：</label>
+                    <input type="number" id="hours2" value="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="holidayHours1">休息日加班前8小時：</label>
+                    <input type="number" id="holidayHours1" value="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="holidayHours2">休息日加班8小時以上：</label>
+                    <input type="number" id="holidayHours2" value="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="nationalHolidayHours">國定假日加班時數：</label>
+                    <input type="number" id="nationalHolidayHours" value="0" min="0">
+                </div>
+            </div>
+            
+            <div id="bonusTab" class="tabcontent">
+                <h3>獎金與津貼</h3>
+                <div class="form-group">
+                    <label for="mealAllowance">伙食津貼 (元)：</label>
+                    <input type="number" id="mealAllowance" value="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="transportAllowance">交通津貼 (元)：</label>
+                    <input type="number" id="transportAllowance" value="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="performanceBonus">績效獎金 (元)：</label>
+                    <input type="number" id="performanceBonus" value="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="attendanceBonus">全勤獎金 (元)：</label>
+                    <input type="number" id="attendanceBonus" value="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="specialAllowance">特殊津貼 (元)：</label>
+                    <input type="number" id="specialAllowance" value="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="yearEndBonus">年終獎金分攤 (元)：</label>
+                    <input type="number" id="yearEndBonus" value="0" min="0">
+                </div>
+            </div>
+            
+            <div id="deductionTab" class="tabcontent">
+                <h3>扣減項目</h3>
+                <div class="form-group">
+                    <label for="laborInsurance">勞保費 (元)：</label>
+                    <input type="number" id="laborInsurance" value="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="healthInsurance">健保費 (元)：</label>
+                    <input type="number" id="healthInsurance" value="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="pension">勞工退休金 (元)：</label>
+                    <input type="number" id="pension" value="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="incomeTax">所得稅 (元)：</label>
+                    <input type="number" id="incomeTax" value="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="absenceDays">請假天數：</label>
+                    <input type="number" id="absenceDays" value="0" min="0" step="0.5">
+                </div>
+                <div class="form-group">
+                    <label for="lateTimes">遲到次數：</label>
+                    <input type="number" id="lateTimes" value="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="otherDeductions">其他扣款 (元)：</label>
+                    <input type="number" id="otherDeductions" value="0" min="0">
+                </div>
+            </div>
+            
+            <button type="button" onclick="calculateSalary()">計算薪資</button>
+        </form>
+
+        <div id="result" class="result" style="display: none;"></div>
+        
+        <div class="notes">
+            <p><strong>注意事項：</strong></p>
+            <ul>
+                <li>平日加班費：前2小時為時薪的1.33倍，2小時以上為1.66倍</li>
+                <li>休息日加班費：前8小時為時薪的1.33倍，8小時以上為1.66倍</li>
+                <li>國定假日加班費：為時薪的2倍</li>
+                <li>勞保費、健保費等數據請依照個人實際情況填寫</li>
+                <li>薪資計算結果僅供參考，實際薪資以公司規定為準</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        
+        function updateSalaryFields() {
+            const salaryType = document.getElementById('salaryType').value;
+            if (salaryType === 'monthly') {
+                document.getElementById('monthlySalaryFields').classList.remove('hidden');
+                document.getElementById('hourlySalaryFields').classList.add('hidden');
+            } else {
+                document.getElementById('monthlySalaryFields').classList.add('hidden');
+                document.getElementById('hourlySalaryFields').classList.remove('hidden');
+            }
+        }
+        
+        function calculateSalary() {
+            // 基本資料
+            const salaryType = document.getElementById('salaryType').value;
+            let basicSalary = 0;
+            let hourlyWage = 0;
+            
+            if (salaryType === 'monthly') {
+                const salary = parseFloat(document.getElementById('salary').value) || 0;
+                const workingDays = parseFloat(document.getElementById('workingDays').value) || 22;
+                const workingHours = parseFloat(document.getElementById('workingHours').value) || 8;
+                
+                basicSalary = salary;
+                hourlyWage = salary / workingDays / workingHours;
+            } else {
+                const hourlyRate = parseFloat(document.getElementById('hourlyRate').value) || 0;
+                const totalHours = parseFloat(document.getElementById('totalHours').value) || 0;
+                
+                basicSalary = hourlyRate * totalHours;
+                hourlyWage = hourlyRate;
+            }
+            
+            // 加班費計算
+            const hours1 = parseFloat(document.getElementById('hours1').value) || 0;
+            const hours2 = parseFloat(document.getElementById('hours2').value) || 0;
+            const holidayHours1 = parseFloat(document.getElementById('holidayHours1').value) || 0;
+            const holidayHours2 = parseFloat(document.getElementById('holidayHours2').value) || 0;
+            const nationalHolidayHours = parseFloat(document.getElementById('nationalHolidayHours').value) || 0;
+            
+            const overtimePay1 = hours1 * hourlyWage * 1.33;
+            const overtimePay2 = hours2 * hourlyWage * 1.66;
+            const holidayOvertimePay1 = holidayHours1 * hourlyWage * 1.33;
+            const holidayOvertimePay2 = holidayHours2 * hourlyWage * 1.66;
+            const nationalHolidayPay = nationalHolidayHours * hourlyWage * 2;
+            
+            const totalOvertimePay = overtimePay1 + overtimePay2 + holidayOvertimePay1 + holidayOvertimePay2 + nationalHolidayPay;
+            
+            // 津貼與獎金
+            const mealAllowance = parseFloat(document.getElementById('mealAllowance').value) || 0;
+            const transportAllowance = parseFloat(document.getElementById('transportAllowance').value) || 0;
+            const performanceBonus = parseFloat(document.getElementById('performanceBonus').value) || 0;
+            const attendanceBonus = parseFloat(document.getElementById('attendanceBonus').value) || 0;
+            const specialAllowance = parseFloat(document.getElementById('specialAllowance').value) || 0;
+            const yearEndBonus = parseFloat(document.getElementById('yearEndBonus').value) || 0;
+            
+            const totalBonus = mealAllowance + transportAllowance + performanceBonus + attendanceBonus + specialAllowance + yearEndBonus;
+            
+            // 扣減項目
+            const laborInsurance = parseFloat(document.getElementById('laborInsurance').value) || 0;
+            const healthInsurance = parseFloat(document.getElementById('healthInsurance').value) || 0;
+            const pension = parseFloat(document.getElementById('pension').value) || 0;
+            const incomeTax = parseFloat(document.getElementById('incomeTax').value) || 0;
+            const absenceDays = parseFloat(document.getElementById('absenceDays').value) || 0;
+            const lateTimes = parseFloat(document.getElementById('lateTimes').value) || 0;
+            const otherDeductions = parseFloat(document.getElementById('otherDeductions').value) || 0;
+            
+            // 請假扣款計算
+            let absenceDeduction = 0;
+            if (salaryType === 'monthly') {
+                const workingDays = parseFloat(document.getElementById('workingDays').value) || 22;
+                absenceDeduction = (basicSalary / workingDays) * absenceDays;
+            }
+            
+            // 遲到扣款 (假設每次遲到扣100元)
+            const lateDeduction = lateTimes * 100;
+            
+            const totalDeductions = laborInsurance + healthInsurance + pension + incomeTax + absenceDeduction + lateDeduction + otherDeductions;
+            
+            // 最終薪資計算
+            const netSalary = basicSalary + totalOvertimePay + totalBonus - totalDeductions;
+            
+            // 顯示結果
+            document.getElementById('result').innerHTML = `
+                <h3>薪資明細</h3>
+                <div class="salary-item">
+                    <span>基本薪資：</span>
+                    <span>${basicSalary.toFixed(2)} 元</span>
+                </div>
+                <div class="salary-item">
+                    <span>時薪：</span>
+                    <span>${hourlyWage.toFixed(2)} 元/小時</span>
+                </div>
+                
+                <h4>加班費</h4>
+                <div class="salary-item">
+                    <span>平日前2小時加班費：</span>
+                    <span>${overtimePay1.toFixed(2)} 元</span>
+                </div>
+                <div class="salary-item">
+                    <span>平日2小時以上加班費：</span>
+                    <span>${overtimePay2.toFixed(2)} 元</span>
+                </div>
+                <div class="salary-item">
+                    <span>休息日前8小時加班費：</span>
+                    <span>${holidayOvertimePay1.toFixed(2)} 元</span>
+                </div>
+                <div class="salary-item">
+                    <span>休息日8小時以上加班費：</span>
+                    <span>${holidayOvertimePay2.toFixed(2)} 元</span>
+                </div>
+                <div class="salary-item">
+                    <span>國定假日加班費：</span>
+                    <span>${nationalHolidayPay.toFixed(2)} 元</span>
+                </div>
+                <div class="salary-item total">
+                    <span>加班費小計：</span>
+                    <span>${totalOvertimePay.toFixed(2)} 元</span>
+                </div>
+                
+                <h4>津貼與獎金</h4>
+                <div class="salary-item">
+                    <span>伙食津貼：</span>
+                    <span>${mealAllowance.toFixed(2)} 元</span>
+                </div>
+                <div class="salary-item">
+                    <span>交通津貼：</span>
+                    <span>${transportAllowance.toFixed(2)} 元</span>
+                </div>
+                <div class="salary-item">
+                    <span>績效獎金：</span>
+                    <span>${performanceBonus.toFixed(2)} 元</span>
+                </div>
+                <div class="salary-item">
+                    <span>全勤獎金：</span>
+                    <span>${attendanceBonus.toFixed(2)} 元</span>
+                </div>
+                <div class="salary-item">
+                    <span>特殊津貼：</span>
+                    <span>${specialAllowance.toFixed(2)} 元</span>
+                </div>
+                <div class="salary-item">
+                    <span>年終獎金分攤：</span>
+                    <span>${yearEndBonus.toFixed(2)} 元</span>
+                </div>
+                <div class="salary-item total">
+                    <span>津貼與獎金小計：</span>
+                    <span>${totalBonus.toFixed(2)} 元</span>
+                </div>
+                
+                <h4>扣減項目</h4>
+                <div class="salary-item">
+                    <span>勞保費：</span>
+                    <span>${laborInsurance.toFixed(2)} 元</span>
+                </div>
+                <div class="salary-item">
+                    <span>健保費：</span>
+                    <span>${healthInsurance.toFixed(2)} 元</span>
+                </div>
+                <div class="salary-item">
+                    <span>勞工退休金：</span>
+                    <span>${pension.toFixed(2)} 元</span>
+                </div>
+                <div class="salary-item">
+                    <span>所得稅：</span>
+                    <span>${incomeTax.toFixed(2)} 元</span>
+                </div>
+                <div class="salary-item">
+                    <span>請假扣款 (${absenceDays} 天)：</span>
+                    <span>${absenceDeduction.toFixed(2)} 元</span>
+                </div>
+                <div class="salary-item">
+                    <span>遲到扣款 (${lateTimes} 次)：</span>
+                    <span>${lateDeduction.toFixed(2)} 元</span>
+                </div>
+                <div class="salary-item">
+                    <span>其他扣款：</span>
+                    <span>${otherDeductions.toFixed(2)} 元</span>
+                </div>
+                <div class="salary-item total">
+                    <span>扣減項目小計：</span>
+                    <span>${totalDeductions.toFixed(2)} 元</span>
+                </div>
+                
+                <h3 class="total">實發薪資：${netSalary.toFixed(2)} 元</h3>
+            `;
+            document.getElementById('result').style.display = 'block';
+        }
+        
+        // 頁面載入時初始化
+        window.onload = function() {
+            document.getElementById("basicSalary").style.display = "block";
+        };
+    </script>
+</body>
+</html>
